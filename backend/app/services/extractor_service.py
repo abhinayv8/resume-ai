@@ -37,3 +37,22 @@ def extract_resume_entities(text: str) -> Dict[str, Optional[str | List[str]]]:
         "skills": skills
     }
 
+def extract_job_entities(text: str) -> Dict:
+    """
+    Extracts structured information from a job description.
+    """
+    skill_keywords = [
+        "python", "java", "javascript", "fastapi",
+        "django", "flask", "react", "node",
+        "sql", "postgresql", "mongodb",
+        "aws", "docker", "kubernetes",
+        "git", "linux"
+    ]
+
+    text_lower = text.lower()
+    skills = [skill for skill in skill_keywords if skill in text_lower]
+
+    return {
+        "skills": skills
+    }
+

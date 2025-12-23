@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
+from app.api import resumes, match
 from app.services.parser_service import extract_text
 from app.services.extractor_service import extract_resume_entities
 
