@@ -1,6 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.services.parser_service import extract_text
-from app.services.preprocessing_service import preprocess_text
 from app.services.extractor_service import extract_resume_entities
 
 router = APIRouter()
@@ -13,14 +12,20 @@ async def upload_resume(file: UploadFile = File(...)):
     ]:
         raise HTTPException(status_code=400, detail="Unsupported file type")
 
-    raw_text = extract_text(file)
-    clean_text = preprocess_text(raw_text)
+    # Step 1: Extract raw text
+    text = extract_text(file)
 
-    entities = extract_resume_entities(clean_text)
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="Empty or unreadable resume")
+
+    # Step 2: Extract structured entities
+    entities = extract_resume_entities(text)
 
     return {
         "filename": file.filename,
+        "text_length": len(text),
         "entities": entities,
-        "preview": clean_text[:500]
+        "preview": text[:500]
     }
+
 

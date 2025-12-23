@@ -1,52 +1,39 @@
 import re
-from typing import List, Dict
+from typing import Dict, List, Optional
 
-# Example skill vocabulary (expand later)
-SKILL_KEYWORDS = [
-    "python", "java", "c++", "javascript",
-    "fastapi", "django", "flask",
-    "sql", "postgresql", "mysql",
-    "docker", "kubernetes",
-    "aws", "azure", "gcp",
-    "machine learning", "nlp", "data analysis"
-]
-
-EDUCATION_KEYWORDS = [
-    "bachelor", "master", "phd",
-    "b.tech", "m.tech", "b.sc", "m.sc",
-    "computer science", "information technology"
-]
-
-def extract_skills(text: str) -> List[str]:
-    text_lower = text.lower()
-    return sorted(
-        {skill for skill in SKILL_KEYWORDS if skill in text_lower}
-    )
-
-def extract_education(text: str) -> List[str]:
-    text_lower = text.lower()
-    return sorted(
-        {edu for edu in EDUCATION_KEYWORDS if edu in text_lower}
-    )
-
-def extract_experience_years(text: str) -> float:
+def extract_resume_entities(text: str) -> Dict[str, Optional[str | List[str]]]:
     """
-    Extract experience like:
-    - '3 years experience'
-    - '2.5 yrs'
-    - '5+ years'
+    Extracts basic structured information from resume text.
+    Deterministic, rule-based (no ML yet).
     """
-    matches = re.findall(
-        r"(\d+(?:\.\d+)?)\s*(?:\+?\s*)?(?:years?|yrs?)",
-        text.lower()
-    )
-    if not matches:
-        return 0.0
-    return max(float(m) for m in matches)
 
-def extract_resume_entities(text: str) -> Dict:
+    # Email extraction
+    emails = re.findall(
+        r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+",
+        text
+    )
+
+    # Phone number extraction
+    phones = re.findall(
+        r"\+?\d[\d\s\-]{8,}\d",
+        text
+    )
+
+    # Skill keyword matching (extend later)
+    skill_keywords = [
+        "python", "java", "javascript", "fastapi",
+        "django", "flask", "react", "node",
+        "sql", "postgresql", "mongodb",
+        "aws", "docker", "kubernetes",
+        "git", "linux"
+    ]
+
+    text_lower = text.lower()
+    skills = [skill for skill in skill_keywords if skill in text_lower]
+
     return {
-        "skills": extract_skills(text),
-        "education": extract_education(text),
-        "experience_years": extract_experience_years(text)
+        "email": emails[0] if emails else None,
+        "phone": phones[0] if phones else None,
+        "skills": skills
     }
+
