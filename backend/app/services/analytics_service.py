@@ -81,8 +81,7 @@ def skill_gap_analysis(db: Session, job_id: int):
     missing_counts = {}
 
     for skill in skill_keywords:
-        required = skill in job_text
-        if not required:
+        if skill not in job_text:
             continue
 
         missing = 0
@@ -93,13 +92,11 @@ def skill_gap_analysis(db: Session, job_id: int):
         if missing > 0:
             missing_counts[skill] = missing
 
-    sorted_missing = sorted(
-        missing_counts.items(),
-        key=lambda x: x[1],
-        reverse=True,
-    )
-
     return {
         "job_id": job_id,
-        "missing_skills": sorted_missing,
+        "missing_skills": sorted(
+            missing_counts.items(),
+            key=lambda x: x[1],
+            reverse=True,
+        ),
     }
