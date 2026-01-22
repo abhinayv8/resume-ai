@@ -44,3 +44,62 @@ def job_overview(db: Session, job_id: int):
             {"resume_id": r.resume_id, "score": r.score} for r in top
         ],
     }
+
+def skill_gap_analysis(db: Session, job_id: int):
+    rankings = (
+        db.query(models.Ranking)
+        .filter(models.Ranking.job_id == job_id)
+        .all()
+    )
+
+    if not rankings:
+        return {
+            "job_id": job_id,
+            "missing_skills": [],
+        }
+
+    resumes = (
+        db.query(models.Resume.text)
+        .join(models.Ranking, models.Ranking.resume_id == models.Resume.id)
+        .filter(models.Ranking.job_id == job_id)
+        .all()
+    )
+
+    job = db.query(models.Job).filter(models.Job.id == job_id).first()
+
+    if not job:
+        return {"job_id": job_id, "missing_skills": []}
+
+    job_text = job.description.lower()
+
+    skill_keywords = [
+        "python", "java", "javascript", "fastapi", "django",
+        "flask", "react", "node", "sql", "postgresql",
+        "mongodb", "aws", "docker", "kubernetes", "git", "linux",
+    ]
+
+    missing_counts = {}
+
+    for skill in skill_keywords:
+        required = skill in job_text
+        if not required:
+            continue
+
+        missing = 0
+        for (resume_text,) in resumes:
+            if skill not in resume_text.lower():
+                missing += 1
+
+        if missing > 0:
+            missing_counts[skill] = missing
+
+    sorted_missing = sorted(
+        missing_counts.items(),
+        key=lambda x: x[1],
+        reverse=True,
+    )
+
+    return {
+        "job_id": job_id,
+        "missing_skills": sorted_missing,
+    }

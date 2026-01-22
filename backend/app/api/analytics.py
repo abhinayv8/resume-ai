@@ -13,4 +13,9 @@ def get_platform_overview(db: Session = Depends(get_db)):
 def get_job_overview(job_id: int, db: Session = Depends(get_db)):
     return job_overview(db, job_id)
 
+from app.services.analytics_service import skill_gap_analysis
+
+@router.get("/job/{job_id}/skill-gaps")
+def get_skill_gaps(job_id: int, db: Session = Depends(get_db)):
+    return skill_gap_analysis(db, job_id)
 
