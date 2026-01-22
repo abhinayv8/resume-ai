@@ -1,23 +1,16 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.db import models
+from app.services.analytics_service import platform_overview, job_overview
 
 router = APIRouter()
 
-from app.db.session import get_db
-
 @router.get("/overview")
-def analytics_overview(db: Session = Depends(get_db)):
-    total_resumes = db.query(models.Resume).count()
-    total_jobs = db.query(models.Job).count()
-    scores = [s[0] for s in db.query(models.Ranking.score).all()]
-    avg_score = sum(scores) / len(scores) if scores else 0
-    return {
-        "total_resumes": total_resumes,
-        "total_jobs": total_jobs,
-        "average_match_score": round(avg_score, 2),
-    }
+def get_platform_overview(db: Session = Depends(get_db)):
+    return platform_overview(db)
 
+@router.get("/job/{job_id}")
+def get_job_overview(job_id: int, db: Session = Depends(get_db)):
+    return job_overview(db, job_id)
 
 

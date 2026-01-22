@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from typing import List
 from pydantic import BaseModel
 from app.services.ranking_service import rank_resumes
-from app.services.analytics_service import generate_hiring_analytics
 from app.db.session import get_db
 from app.db import models
 from fastapi import Body
@@ -35,12 +34,10 @@ def rank_candidates(
 
     db.commit()
 
-    analytics = generate_hiring_analytics(ranked)
-
     return {
-        "ranked_candidates": ranked,
-        "analytics": analytics,
-    }
+    "ranked_candidates": ranked
+}
+
 
 @router.get("/job/{job_id}")
 def get_job_rankings(job_id: int, db: Session = Depends(get_db)):
